@@ -5,7 +5,7 @@ Hope-Simpson, R.E. (1981) The role of season in the epidemiology of influenza. E
 
 from pycovid.utils import read_daily_registrations
 import pandas as pd
-from pycovid import DATA_DIR
+from pycovid import DATA_DIR, OUTPUT_DIR
 from datetime import datetime
 import matplotlib.pyplot as plt
 from matplotlib.dates import MonthLocator, DateFormatter
@@ -83,7 +83,7 @@ def create_plot(df: pd.DataFrame, df_hs: pd.DataFrame):
     ax.fill_between(df_hs.index, df_hs["Hope-Simpson"], 0, color=(0.1, 0.1, 0.1, 0.05))
     ax.legend()
 
-    plt.show()
+    plt.savefig(OUTPUT_DIR / "Hope-Simpson.png")
 
 
 if __name__ == "__main__":

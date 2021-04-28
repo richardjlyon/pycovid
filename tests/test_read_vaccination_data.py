@@ -1,5 +1,4 @@
 from pycovid.utils import read_vaccination_data
-from pycovid import DATA_DIR
 
 
 def test_read_vaccination_data():

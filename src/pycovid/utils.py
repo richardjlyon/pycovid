@@ -63,23 +63,7 @@ def read_daily_registrations(filename, skiprows, cols, daterange) -> pd.DataFram
     return df
 
 
-def read_vaccination_data(filename) -> pd.DataFrame:
-    """Read NHS Vaccination data for England and return as a dataframe."""
-    skiprows = list(range(12)) + list(range(100, 500))
-    df = pd.read_excel(
-        DATA_DIR / filename,
-        sheet_name="Vaccination Date",
-        usecols="B,T",
-        skiprows=skiprows,
-        parse_dates=True,
-        index_col=0,
-    )
-    df.columns = ["Total doses"]
-
-    return df
-
-
-def get_fatal_infections(
+def prepare_fatal_infection_data(
     region: str = "UK", start_date: str = None, end_date: str = None
 ) -> pd.DataFrame:
     """
@@ -141,6 +125,22 @@ def get_fatal_infections(
     return df
 
 
+def read_vaccination_data(filename) -> pd.DataFrame:
+    """Read NHS Vaccination data for England and return as a dataframe."""
+    skiprows = list(range(12)) + list(range(100, 500))
+    df = pd.read_excel(
+        DATA_DIR / filename,
+        sheet_name="Vaccination Date",
+        usecols="B,T",
+        skiprows=skiprows,
+        parse_dates=True,
+        index_col=0,
+    )
+    df.columns = ["Total doses"]
+
+    return df
+
+
 def polyfit(df: pd.Series, start_date, end_date) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Compute the polynomial fit for df between start_date and end_date.
 
@@ -166,47 +166,57 @@ def polyfit(df: pd.Series, start_date, end_date) -> Tuple[pd.DataFrame, pd.DataF
     return log_infections_fit, infections_fit
 
 
-def create_figure(title: str = "None"):
-    """Create a side-by-side figure with the given title."""
+def create_figure(
+    title: str,
+    df: pd.DataFrame,
+    fits: List[FitItem] = [],
+    regions: List[RegionItem] = [],
+    events: List[EventItem] = [],
+    show_vaccinations=True,
+):
+    """Create a side-by-side figure of fatal infections and (optionally) vaccinations, with overlays."""
+
+    # plt.tight_layout()
+
     fig, (ax1, ax2) = plt.subplots(1, 2)
+    ax3 = ax2.twinx()
     fig.set_size_inches(16, 5)
+    fig.set_tight_layout(True)
     fig.patch.set_facecolor("white")
     fig.suptitle(title)
 
-    ax1.xaxis.set_major_locator(YearLocator())
-    ax1.xaxis.set_major_formatter(DateFormatter("\n%Y"))
-    ax1.xaxis.set_minor_locator(MonthLocator((1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)))
-    ax1.xaxis.set_minor_formatter(DateFormatter("%b"))
+    # set x axis date label format
+    for ax in [ax1, ax2, ax3]:
 
-    ax2.xaxis.set_major_locator(YearLocator())
-    ax2.xaxis.set_major_formatter(DateFormatter("\n%Y"))
-    ax2.xaxis.set_minor_locator(MonthLocator((1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)))
-    ax2.xaxis.set_minor_formatter(DateFormatter("%b"))
+        ax.xaxis.set_major_locator(YearLocator())
+        ax.xaxis.set_major_formatter(DateFormatter("\n%Y"))
+        ax.xaxis.set_minor_locator(
+            MonthLocator((1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12))
+        )
+        ax.xaxis.set_minor_formatter(DateFormatter("%b"))
 
-    return ax1, ax2
-
-
-def provision_plot(
-    ax1,
-    ax2,
-    df: pd.DataFrame,
-    fits: List[FitItem] = None,
-    regions: List[RegionItem] = None,
-    events: List[EventItem] = None,
-):
-    """Provision the given axes with data."""
-
+    # plot fatal infections (left panel)
     ax1.plot(df.index, df["infections"], color="lightgrey")
     ax1.set_ylabel("fatal infections")
-    ax1.legend()
 
+    # plot log(fatal infections) (right panel)
     ax2.plot(df.index, df["infections (log)"], color="lightgrey")
     ax2.set_ylabel("log(fatal infections)")
+    ax2.set_ylim([0, df["infections (log)"].max() * 1.05])
 
-    ax3 = ax2.twinx()
-    ax3.set(xticklabels=[])
-    ax3.set_ylabel("Vaccinations")
-    ax3.plot(df["Vaccinations"])
+    # plot vaccinations
+    if show_vaccinations:
+        ax3.set_ylabel("Vaccinations (million)", color="m")
+        ax3.plot(df["Vaccinations"] / 1e6, color="m")
+        ax3.fill_between(
+            x=df["Vaccinations"].index,
+            y1=0,
+            y2=df["Vaccinations"] / 1e6,
+            color="m",
+            alpha=0.1,
+        )
+
+    ax3.set_ylim([0, df["Vaccinations"].max() / 1e6 * 2])
 
     for fit in fits:
         ax1.plot(fit.infection, color=fit.colour)
@@ -241,6 +251,8 @@ def provision_plot(
             arrowprops=dict(arrowstyle="-|>"),
         )
 
+    ax1.legend()
+
 
 def make_dates(df, start_date, end_date):
     if start_date is not None:
@@ -252,29 +264,3 @@ def make_dates(df, start_date, end_date):
     else:
         end_date = df.index[-1]
     return start_date, end_date
-
-
-def government_response(measures: List[str]) -> pd.DataFrame:
-    """
-    Get COVID-19 Government Response data (see: https://github.com/OxCGRT/covid-policy-tracker)
-    :param index_name: The index to fetch (this is the tab name in the workbook)
-    :return: a datafrom with the data as a timeseries
-    """
-
-    result = pd.DataFrame()
-
-    for measure in measures:
-        df = pd.read_excel(
-            DATA_DIR / "OxCGRT_timeseries_all.xlsx",
-            sheet_name=measure,
-        )
-
-        df = df[df["country_code"] == "GBR"].T
-        df = df.drop(["country_code", "country_name"])
-        df.index = pd.to_datetime(df.index)
-        df.rename(columns={61: measure}, inplace=True)
-
-        # result.index = pd.to_datetime(df.index)
-        result = pd.concat([result, df], axis=1)
-
-    return result
