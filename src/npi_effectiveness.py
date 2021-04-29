@@ -1,8 +1,8 @@
 """
 npi_effectiveness.py
 
-Poreare a series of plots for illustrating the relationship between COVID-19 fatal infection rate in England
-with Non Pharmaceutical Interventions and vaccination doses to analyse correlation (if any).
+Prepare a series of plots for exploring the relationship (if any) between COVID-19 fatal infection rate in England, Non
+Pharmaceutical Interventions, and vaccination doses.
 """
 
 import matplotlib.pyplot as plt
@@ -23,13 +23,11 @@ from pycovid.data_utils import (
 
 def plot_overview(df: pd.DataFrame):
 
-    fits = []
-    regions = []
-    events = []
-
     # fitted lines ######################################################################
 
     # regions ######################################################################
+
+    regions = []
 
     regions.append(
         RegionItem(
@@ -55,9 +53,7 @@ def plot_overview(df: pd.DataFrame):
     create_figure(
         "Fatal COVID-19 Infections England 2020/21 vs. seasonal respiratory infection winter cycle",
         df,
-        fits,
-        regions,
-        events,
+        regions=regions,
         show_deaths=True,
         show_vaccinations=False,
     )
@@ -67,13 +63,11 @@ def plot_overview(df: pd.DataFrame):
 
 def plot_2020(df: pd.DataFrame):
 
-    fits = []
-    regions = []
-    events = []
-
     df = df.loc["1 Jan 2020":"31 Jul 2020"]
 
     # fitted lines ######################################################################
+
+    fits = []
 
     log_infection, infection = polyfit(
         df["infections (log)"], "20 Mar 2020", "23 Jun 2020"
@@ -82,11 +76,15 @@ def plot_2020(df: pd.DataFrame):
 
     # regions ######################################################################
 
+    regions = []
+
     regions.append(
         RegionItem("23 Jun 2020", "15 Aug 2020", "tab:orange", "2020 heatwave")
     )
 
     # events #######################################################################
+
+    events = []
 
     events.append(EventItem("2020-03-26", "Lockdown #1"))
     events.append(EventItem("2020-04-30", "'Past the peak'"))
@@ -103,7 +101,6 @@ def plot_2020(df: pd.DataFrame):
         fits=fits,
         regions=regions,
         events=events,
-        show_vaccinations=False,
     )
 
     plt.savefig(OUTPUT_DIR / "Fig 2 2020.png")
@@ -111,13 +108,11 @@ def plot_2020(df: pd.DataFrame):
 
 def plot_2020_2021(df: pd.DataFrame):
 
-    fits = []
-    regions = []
-    events = []
-
     df = df.loc["1 Jul 2020":"10 Mar 2021"]
 
     # fitted lines ######################################################################
+
+    fits = []
 
     log_infection, infection = polyfit(
         df["infections (log)"], "1 Aug 2020", "10 Oct 2020"
@@ -131,12 +126,16 @@ def plot_2020_2021(df: pd.DataFrame):
 
     # regions ######################################################################
 
+    regions = []
+
     regions.append(
         RegionItem("23 Jun 2020", "15 Aug 2020", "tab:orange", "2020 heatwave")
     )
     regions.append(RegionItem("23 Dec 2020", "27 Dec 2020", "tab:red", "Christmas"))
 
     # events #######################################################################
+
+    events = []
 
     events.append(EventItem("2020-08-03", "Eat out help out start"))
     events.append(EventItem("2020-08-14", "Further easing"))
@@ -145,9 +144,11 @@ def plot_2020_2021(df: pd.DataFrame):
     events.append(EventItem("2020-11-05", "Lockdown #2"))
     events.append(EventItem("2020-12-02", "Lockdown #2 End"))
     events.append(EventItem("2020-12-21", "Tier 4 restrictions"))
+    events.append(EventItem("2020-12-23", "Christmas easing"))
     events.append(EventItem("2021-01-06", "Lockdown #3"))
 
     # OK. Go! ######################################################################
+
     create_figure(
         "Fatal COVID-19 Infections England 2020/21 vs. key Non Pharmaceutical Interventions",
         df,
@@ -161,14 +162,19 @@ def plot_2020_2021(df: pd.DataFrame):
 
 
 def plot_vaccination_detail(df: pd.DataFrame):
-    fits = []
 
     df = df.loc["1 Dec 2020":"31 Mar 2021"]
+
+    # fitted lines ######################################################################
+
+    fits = []
 
     log_infection, infection = polyfit(
         df["infections (log)"], "11 Jan 2021", "8 Mar 2021"
     )
     fits.append(FitItem(log_infection, infection, "tab:green"))
+
+    # OK. Go! ######################################################################
 
     create_figure(
         "COVID-19 Fatal Infection decline rate vs. vaccine doses (England)",

@@ -50,11 +50,9 @@ def create_figure(
     regions: List[RegionItem] = [],
     events: List[EventItem] = [],
     show_deaths=False,
-    show_vaccinations=True,
+    show_vaccinations=False,
 ):
     """Create a side-by-side figure of fatal infections and (optionally) vaccinations, with overlays."""
-
-    # plt.tight_layout()
 
     fig, (ax1, ax2) = plt.subplots(1, 2)
     if show_vaccinations:
