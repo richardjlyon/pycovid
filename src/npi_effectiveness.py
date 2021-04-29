@@ -8,76 +8,26 @@ with Non Pharmaceutical Interventions and vaccination doses to analyse correlati
 import matplotlib.pyplot as plt
 import pandas as pd
 from pycovid import OUTPUT_DIR
-from pycovid.utils import (
-    prepare_fatal_infection_data,
-    read_vaccination_data,
-    polyfit,
+from pycovid.chart_utils import (
     create_figure,
     FitItem,
     RegionItem,
     EventItem,
 )
+from pycovid.data_utils import (
+    prepare_fatal_infection_data,
+    read_vaccination_data,
+    polyfit,
+)
 
 
-def plot_2019_2020_infections(df: pd.DataFrame):
+def plot_overview(df: pd.DataFrame):
 
     fits = []
     regions = []
     events = []
 
     # fitted lines ######################################################################
-
-    log_infection, infection = polyfit(
-        df["infections (log)"], "20 Mar 2020", "23 Jun 2020"
-    )
-    fits.append(FitItem(log_infection, infection, "tab:red"))
-
-    log_infection, infection = polyfit(
-        df["infections (log)"], "15 Aug 2020", "10 Oct 2020"
-    )
-    fits.append(FitItem(log_infection, infection, "tab:blue"))
-
-    log_infection, infection = polyfit(
-        df["infections (log)"], "12 Jan 2021", "8 Mar 2021"
-    )
-    fits.append(FitItem(log_infection, infection, "tab:green"))
-
-    # regions ######################################################################
-
-    regions.append(
-        RegionItem("23 Jun 2020", "15 Aug 2020", "tab:orange", "2020 heatwave")
-    )
-    regions.append(RegionItem("23 Dec 2020", "27 Dec 2020", "tab:red", "Christmas"))
-
-    # events #######################################################################
-
-    events.append(EventItem("2020-05-10", "Restrictions lifted"))
-    events.append(EventItem("2020-06-1", "School reopens"))
-    events.append(EventItem("2020-06-15", "Retail reopens"))
-    events.append(EventItem("2020-06-23", "Relaxation of restrictions"))
-    events.append(EventItem("2020-07-04", "Pubs, restaurants, bars reopen"))
-    events.append(EventItem("2020-09-14", "Rule of 6"))
-    events.append(EventItem("2020-09-22", "10pm curfew"))
-    events.append(EventItem("2021-01-04", "return to school"))
-    events.append(EventItem("2021-02-15", "Hotel quarantining"))
-
-    # OK. Go! ######################################################################
-
-    create_figure(
-        "Fatal COVID-19 Infections England 2020/21 vs. Non Pharmaceutical Interventions and vaccination",
-        df,
-        fits,
-        regions,
-        events,
-    )
-
-    plt.savefig(OUTPUT_DIR / "2020 2021 infections vs NPIs.png")
-
-
-def plot_winter_seasons(df: pd.DataFrame):
-    fits = []
-    regions = []
-    events = []
 
     # regions ######################################################################
 
@@ -100,10 +50,97 @@ def plot_winter_seasons(df: pd.DataFrame):
 
     # events #######################################################################
 
+    # OK. Go! ######################################################################
+
+    create_figure(
+        "Fatal COVID-19 Infections England 2020/21 vs. seasonal respiratory infection winter cycle",
+        df,
+        fits,
+        regions,
+        events,
+        show_deaths=True,
+        show_vaccinations=False,
+    )
+
+    plt.savefig(OUTPUT_DIR / "Fig 1 Overview.png")
+
+
+def plot_2020(df: pd.DataFrame):
+
+    fits = []
+    regions = []
+    events = []
+
+    df = df.loc["1 Jan 2020":"31 Jul 2020"]
+
+    # fitted lines ######################################################################
+
+    log_infection, infection = polyfit(
+        df["infections (log)"], "20 Mar 2020", "23 Jun 2020"
+    )
+    fits.append(FitItem(log_infection, infection, "tab:red"))
+
+    # regions ######################################################################
+
+    regions.append(
+        RegionItem("23 Jun 2020", "15 Aug 2020", "tab:orange", "2020 heatwave")
+    )
+
+    # events #######################################################################
+
     events.append(EventItem("2020-03-26", "Lockdown #1"))
     events.append(EventItem("2020-04-30", "'Past the peak'"))
-    events.append(EventItem("2020-08-03", "Eat out help out"))
+    events.append(EventItem("2020-05-10", "Restrictions relaxed"))
+    events.append(EventItem("2020-06-1", "School reopens"))
+    events.append(EventItem("2020-06-15", "Retail reopens"))
+    events.append(EventItem("2020-06-23", "Restrictions relaxed"))
+    events.append(EventItem("2020-07-04", "Pubs, restaurants, bars reopen"))
+
+    # OK. Go! ######################################################################
+    create_figure(
+        "Fatal COVID-19 Infections England 2020 vs. key Non Pharmaceutical Interventions",
+        df,
+        fits=fits,
+        regions=regions,
+        events=events,
+        show_vaccinations=False,
+    )
+
+    plt.savefig(OUTPUT_DIR / "Fig 2 2020.png")
+
+
+def plot_2020_2021(df: pd.DataFrame):
+
+    fits = []
+    regions = []
+    events = []
+
+    df = df.loc["1 Jul 2020":"10 Mar 2021"]
+
+    # fitted lines ######################################################################
+
+    log_infection, infection = polyfit(
+        df["infections (log)"], "1 Aug 2020", "10 Oct 2020"
+    )
+    fits.append(FitItem(log_infection, infection, "tab:blue"))
+
+    log_infection, infection = polyfit(
+        df["infections (log)"], "12 Jan 2021", "8 Mar 2021"
+    )
+    fits.append(FitItem(log_infection, infection, "tab:green"))
+
+    # regions ######################################################################
+
+    regions.append(
+        RegionItem("23 Jun 2020", "15 Aug 2020", "tab:orange", "2020 heatwave")
+    )
+    regions.append(RegionItem("23 Dec 2020", "27 Dec 2020", "tab:red", "Christmas"))
+
+    # events #######################################################################
+
+    events.append(EventItem("2020-08-03", "Eat out help out start"))
     events.append(EventItem("2020-08-14", "Further easing"))
+    events.append(EventItem("2020-08-31", "Eat out help out end"))
     events.append(EventItem("2020-10-14", "3-Tier system"))
     events.append(EventItem("2020-11-05", "Lockdown #2"))
     events.append(EventItem("2020-12-02", "Lockdown #2 End"))
@@ -112,25 +149,49 @@ def plot_winter_seasons(df: pd.DataFrame):
 
     # OK. Go! ######################################################################
     create_figure(
-        "Fatal COVID-19 Infections England 2021 vs. northern hemisphere winter respiratory infection cycles",
+        "Fatal COVID-19 Infections England 2020/21 vs. key Non Pharmaceutical Interventions",
         df,
+        fits=fits,
         regions=regions,
         events=events,
-        show_vaccinations=False,
+        show_vaccinations=True,
     )
 
-    plt.savefig(OUTPUT_DIR / "Overall profile.png")
+    plt.savefig(OUTPUT_DIR / "Fig 3 2020_2021.png")
+
+
+def plot_vaccination_detail(df: pd.DataFrame):
+    fits = []
+
+    df = df.loc["1 Dec 2020":"31 Mar 2021"]
+
+    log_infection, infection = polyfit(
+        df["infections (log)"], "11 Jan 2021", "8 Mar 2021"
+    )
+    fits.append(FitItem(log_infection, infection, "tab:green"))
+
+    create_figure(
+        "COVID-19 Fatal Infection decline rate vs. vaccine doses (England)",
+        df,
+        fits=fits,
+        show_vaccinations=True,
+    )
+    plt.savefig(OUTPUT_DIR / "Fig 4 Vaccine detail.png")
 
 
 if __name__ == "__main__":
     df = prepare_fatal_infection_data(
-        region="England", start_date="1 Feb 2020", end_date="28 Apr 2021"
+        workbook="publishedweek142021.xlsx",
+        region="England",
+        start_date="1 Feb 2020",
+        end_date="28 Apr 2021",
     )
+
     df["Vaccinations"] = read_vaccination_data(
-        "COVID-19-monthly-announced-vaccinations-15-April-2021-revised.xlsx"
+        workbook="COVID-19-monthly-announced-vaccinations-15-April-2021-revised.xlsx"
     )
 
-    plot_winter_seasons(df)
-    plot_2019_2020_infections(df)
-
-    # plt.show()
+    plot_overview(df)
+    plot_2020(df)
+    plot_2020_2021(df)
+    plot_vaccination_detail(df)

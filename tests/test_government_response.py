@@ -1,4 +1,4 @@
-from pycovid.utils import government_response
+from pycovid.data_utils import government_response
 import matplotlib.pyplot as plt
 
 

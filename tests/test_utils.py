@@ -1,5 +1,5 @@
 from pycovid import DATA_DIR
-from pycovid.utils import read_daily_registrations
+from pycovid.data_utils import read_daily_registrations
 import pandas as pd
 
 

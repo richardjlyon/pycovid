@@ -3,7 +3,7 @@ Import ONS COVID-19 deaths and compare with Hope-Simpson fig.2
 Hope-Simpson, R.E. (1981) The role of season in the epidemiology of influenza. Epidemiology & Infect
 """
 
-from pycovid.utils import read_daily_registrations
+from pycovid.data_utils import read_daily_registrations
 import pandas as pd
 from pycovid import DATA_DIR, OUTPUT_DIR
 from datetime import datetime
