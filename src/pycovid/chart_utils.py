@@ -43,6 +43,14 @@ class EventItem:
     label: str
 
 
+@dataclass
+class LabelOrigin:
+    """Class for holding the origin of the labels in a plot."""
+
+    x: int
+    y: int
+
+
 def create_figure(
     title: str,
     df: pd.DataFrame,
@@ -51,6 +59,7 @@ def create_figure(
     events: List[EventItem] = [],
     show_deaths=False,
     show_vaccinations=False,
+    label_origin=LabelOrigin(100, 180),
 ):
     """Create a side-by-side figure of fatal infections and (optionally) vaccinations, with overlays."""
 
@@ -98,9 +107,9 @@ def create_figure(
         color = "tab:blue"
     else:
         color = "lightgrey"
-    ax2.plot(df.index, df["infections (log)"], color=color)
-    ax2.set_ylabel("log(fatal infections)")
-    ax2.set_ylim([0, df["infections (log)"].max() * 1.05])
+    ax2.semilogy(df.index, df["infections"], color=color)
+    ax2.set_ylabel("fatal infections (logarithmic scale)")
+    ax2.set_ylim([0, 1400])
 
     # plot vaccinations
     if show_vaccinations:
@@ -117,7 +126,7 @@ def create_figure(
 
     for fit in fits:
         ax1.plot(fit.infection, color=fit.colour)
-        ax2.plot(fit.log_infection, color=fit.colour)
+        ax2.plot(fit.infection, color=fit.colour)
 
     for region in regions:
         for ax in [ax1, ax2]:
@@ -132,7 +141,7 @@ def create_figure(
     for i, event in enumerate(events):
         x = datestr2num(event.date)
         y1 = df["infections"][event.date]
-        y2 = df["infections (log)"][event.date]
+        y2 = df["infections"][event.date]
         ax1.annotate(
             f"{i+1}",
             (x, y1),
@@ -143,9 +152,9 @@ def create_figure(
         ax2.annotate(
             f"{i+1} {event.label}",
             (x, y2),
-            xytext=(200, 180 - i * 20),
+            xytext=(label_origin.x, label_origin.y - i * 20),
             textcoords="axes pixels",
             arrowprops=dict(arrowstyle="-|>"),
         )
 
-    ax1.legend(loc="upper center")
+    ax1.legend(loc="upper center", ncol=len(regions))

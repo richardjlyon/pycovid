@@ -13,6 +13,7 @@ from pycovid.chart_utils import (
     FitItem,
     RegionItem,
     EventItem,
+    LabelOrigin,
 )
 from pycovid.data_utils import (
     prepare_fatal_infection_data,
@@ -131,7 +132,9 @@ def plot_2020_2021(df: pd.DataFrame):
     regions.append(
         RegionItem("23 Jun 2020", "15 Aug 2020", "tab:orange", "2020 heatwave")
     )
-    regions.append(RegionItem("23 Dec 2020", "27 Dec 2020", "tab:red", "Christmas"))
+    regions.append(
+        RegionItem("23 Dec 2020", "27 Dec 2020", "tab:red", "Christmas easing")
+    )
 
     # events #######################################################################
 
@@ -156,6 +159,7 @@ def plot_2020_2021(df: pd.DataFrame):
         regions=regions,
         events=events,
         show_vaccinations=True,
+        label_origin=LabelOrigin(50, 320),
     )
 
     plt.savefig(OUTPUT_DIR / "Fig 3 2020_2021.png")
@@ -178,13 +182,16 @@ def plot_vaccination_detail(df: pd.DataFrame):
 
     regions = []
 
-    regions.append(RegionItem("23 Dec 2020", "27 Dec 2020", "tab:red", "Christmas"))
+    regions.append(
+        RegionItem("23 Dec 2020", "27 Dec 2020", "tab:red", "Christmas easing")
+    )
 
     # events #######################################################################
 
     events = []
 
     events.append(EventItem("2020-12-23", "Christmas easing"))
+    events.append(EventItem("2021-01-06", "Lockdown #3"))
 
     # OK. Go! ######################################################################
 
