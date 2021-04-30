@@ -174,12 +174,26 @@ def plot_vaccination_detail(df: pd.DataFrame):
     )
     fits.append(FitItem(log_infection, infection, "tab:green"))
 
+    # regions ######################################################################
+
+    regions = []
+
+    regions.append(RegionItem("23 Dec 2020", "27 Dec 2020", "tab:red", "Christmas"))
+
+    # events #######################################################################
+
+    events = []
+
+    events.append(EventItem("2020-12-23", "Christmas easing"))
+
     # OK. Go! ######################################################################
 
     create_figure(
         "COVID-19 Fatal Infection decline rate vs. vaccine doses (England)",
         df,
         fits=fits,
+        regions=regions,
+        events=events,
         show_vaccinations=True,
     )
     plt.savefig(OUTPUT_DIR / "Fig 4 Vaccine detail.png")
