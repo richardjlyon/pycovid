@@ -221,4 +221,3 @@ if __name__ == "__main__":
     plot_overview(df)
     plot_2020(df)
     plot_2020_2021(df)
-    plot_vaccination_detail(df)
