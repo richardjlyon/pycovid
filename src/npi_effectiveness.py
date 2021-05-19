@@ -19,6 +19,7 @@ from pycovid.data_utils import (
     prepare_fatal_infection_data,
     read_vaccination_data,
     polyfit,
+    XLMeta,
 )
 
 SERIES_NAME = "NPI Effectiveness"
@@ -215,12 +216,13 @@ def plot_vaccination_detail(df: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    df = prepare_fatal_infection_data(
-        workbook="publishedweek142021.xlsx",
+    meta = XLMeta(
+        workbook="publishedweek1820211.xlsx",
         region="England",
-        start_date="1 Feb 2020",
-        end_date="28 Apr 2021",
+        start_row=4,
+        end_row=436,
     )
+    df = prepare_fatal_infection_data(meta)
 
     df["Vaccinations"] = read_vaccination_data(
         workbook="COVID-19-monthly-announced-vaccinations-15-April-2021-revised.xlsx"

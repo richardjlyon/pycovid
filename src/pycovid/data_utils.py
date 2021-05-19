@@ -5,14 +5,38 @@ Utilities for preparing data for COVID-19 analysis.
 """
 
 
-from typing import Tuple
+from typing import Tuple, List
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
 from pycovid import DATA_DIR
 
 
-def read_daily_registrations(workbook, skiprows, cols, daterange) -> pd.DataFrame:
+@dataclass
+class XLMeta:
+    """Class for transferring metadata about an ONS spreadsheet."""
+
+    workbook: str
+    region: str
+    start_row: int
+    end_row: int
+
+
+def compute_skiprows(start, end) -> List[int]:
+    """Compute the rows to skip when imprting an ONS spreadsheet."""
+    return list(range(start - 1)) + list(range(end, end + 20))
+
+
+def compute_daterange(df: pd.DataFrame):
+    """Extract the first and last date of the index of df and return as a daterange object."""
+
+    start_date = df["Date"].iloc[0]
+    end_date = df["Date"].iloc[-1]
+    return pd.date_range(start_date, end_date)
+
+
+def read_daily_registrations(workbook, skiprows, cols) -> pd.DataFrame:
     """Read raw ONS data for daily deaths where COVID-19 is mentioned on the certificate."""
     df = pd.read_excel(
         workbook,
@@ -20,6 +44,8 @@ def read_daily_registrations(workbook, skiprows, cols, daterange) -> pd.DataFram
         usecols=cols,
         skiprows=skiprows,
     )
+
+    daterange = compute_daterange(df)
 
     # ONS date formatting is screwed: replace with generated dates
     df["Date"] = daterange
@@ -70,18 +96,13 @@ def prepare_owid_data(csvfile: str) -> pd.DataFrame:
     return df
 
 
-def prepare_fatal_infection_data(
-    workbook: str, region: str = "UK", start_date: str = None, end_date: str = None
-) -> pd.DataFrame:
+def prepare_fatal_infection_data(meta: XLMeta) -> pd.DataFrame:
     """
     Construct a timeseries dataframe of fatal infections.
 
     Fatal infection rate is computed by timeshifting COVID-19 registered fatalities. Fatalities are not recorded at
     weekends, so we smooth the raw data with a rolling window.
 
-    :param region: UK region ('England and Wales', etc.), defaults to "UK"
-    :param start_date: Start date e.g. "1 Mar 2020", defaults to start of data set
-    :param end_date: End date e.g. "1 Apr 2021", defaults to last of data set
     :return: a dataframe of smoothed fatal infection rate and log fatal infection rate
     """
 
@@ -89,17 +110,12 @@ def prepare_fatal_infection_data(
 
     # get the raw death data #####################################################
 
-    filename = DATA_DIR / workbook
-    skiprows = list(range(3)) + list(range(408, 425))
+    filename = DATA_DIR / meta.workbook
+    skiprows = compute_skiprows(meta.start_row, meta.end_row)
     cols = "A:P"
-    daterange = pd.date_range(start="2 Mar 2020", end="9 Apr 2021")
 
-    df = read_daily_registrations(
-        workbook=filename, skiprows=skiprows, cols=cols, daterange=daterange
-    )
-    total_deaths = df[region].sum()
-
-    start_date, end_date = make_dates(df, start_date, end_date)
+    df = read_daily_registrations(workbook=filename, skiprows=skiprows, cols=cols)
+    total_deaths = df[meta.region].sum()
 
     # compute fatal infection from death #########################################
 
@@ -110,7 +126,7 @@ def prepare_fatal_infection_data(
     df = df.reindex(idx)
 
     # compute fatal infections
-    infections = df[region].shift(periods=-INFECTION_TO_DEATH_DAYS)
+    infections = df[meta.region].shift(periods=-INFECTION_TO_DEATH_DAYS)
 
     # smooth: this discards a small number of infections, so scale back up
     infections_smoothed = infections.rolling(window=7, center=True).mean()
@@ -123,12 +139,11 @@ def prepare_fatal_infection_data(
 
     # construct dataframe
     data = {
-        "deaths (raw)": df[region],
+        "deaths (raw)": df[meta.region],
         "infections": infections_smoothed,
         "infections (log)": infections_log,
     }
     df = pd.concat(data, axis=1)
-    df = df.loc[(df.index >= start_date) & (df.index <= end_date)]
 
     return df
 
@@ -158,15 +173,3 @@ def polyfit(
     infections_fit = 10 ** (log_infections_fit)
 
     return log_infections_fit, infections_fit
-
-
-def make_dates(df: pd.DataFrame, start_date: str, end_date: str):
-    if start_date is not None:
-        start_date = pd.to_datetime(start_date)
-    else:
-        start_date = df.index[0]
-    if end_date is not None:
-        end_date = pd.to_datetime(end_date)
-    else:
-        end_date = df.index[-1]
-    return start_date, end_date
