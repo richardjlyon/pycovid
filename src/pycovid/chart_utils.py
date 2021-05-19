@@ -109,7 +109,7 @@ def create_figure(
         color = "lightgrey"
     ax2.semilogy(df.index, df["infections"], color=color)
     ax2.set_ylabel("fatal infections (logarithmic scale)")
-    ax2.set_ylim([0, 1400])
+    ax2.set_ylim([1, 1400])
 
     # plot vaccinations
     if show_vaccinations:

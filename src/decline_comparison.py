@@ -99,17 +99,17 @@ if __name__ == "__main__":
 
     # plot fatal infections (left panel)
     alpha = 0.2
-    ax1.plot(df.index, df["2020"], color="tab:blue", alpha=alpha)
-    ax1.plot(df.index, df["2020 (fit)"], label="2020", color="tab:blue")
-    ax1.plot(df.index, df["2021"], color="tab:red", alpha=alpha)
-    ax1.plot(df.index, df["2021 (fit)"], label="2021", color="tab:red")
+    ax1.plot(df.index, df["2020"], color="tab:red", alpha=alpha)
+    ax1.plot(df.index, df["2020 (fit)"], label="2020", color="tab:red")
+    ax1.plot(df.index, df["2021"], color="tab:green", alpha=alpha)
+    ax1.plot(df.index, df["2021 (fit)"], label="2021", color="tab:green")
     ax1.set_ylabel("fatal infections (normalised)")
     ax1.set_xlabel("Days from peak")
 
-    ax2.semilogy(df.index, df["2020"], color="tab:blue", alpha=alpha)
-    ax2.semilogy(df.index, df["2020 (fit)"], label="2020", color="tab:blue")
-    ax2.semilogy(df.index, df["2021"], color="tab:red", alpha=alpha)
-    ax2.semilogy(df.index, df["2021 (fit)"], label="2021", color="tab:red")
+    ax2.semilogy(df.index, df["2020"], color="tab:red", alpha=alpha)
+    ax2.semilogy(df.index, df["2020 (fit)"], label="2020", color="tab:red")
+    ax2.semilogy(df.index, df["2021"], color="tab:green", alpha=alpha)
+    ax2.semilogy(df.index, df["2021 (fit)"], label="2021", color="tab:green")
     ax2.set_ylabel("fatal infections (logarithmic scale)")
     ax2.set_xlabel("Days from peak")
 

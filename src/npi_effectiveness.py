@@ -21,6 +21,8 @@ from pycovid.data_utils import (
     polyfit,
 )
 
+SERIES_NAME = "NPI Effectiveness"
+
 
 def plot_overview(df: pd.DataFrame):
 
@@ -59,7 +61,7 @@ def plot_overview(df: pd.DataFrame):
         show_vaccinations=False,
     )
 
-    plt.savefig(OUTPUT_DIR / "Fig 1 Overview.png")
+    plt.savefig(OUTPUT_DIR / f"{SERIES_NAME} - Fig 1 Overview.png")
 
 
 def plot_2020(df: pd.DataFrame):
@@ -104,7 +106,7 @@ def plot_2020(df: pd.DataFrame):
         events=events,
     )
 
-    plt.savefig(OUTPUT_DIR / "Fig 2 2020.png")
+    plt.savefig(OUTPUT_DIR / f"{SERIES_NAME} - Fig 2 2020.png")
 
 
 def plot_2020_2021(df: pd.DataFrame):
@@ -162,10 +164,12 @@ def plot_2020_2021(df: pd.DataFrame):
         label_origin=LabelOrigin(50, 320),
     )
 
-    plt.savefig(OUTPUT_DIR / "Fig 3 2020_2021.png")
+    plt.savefig(OUTPUT_DIR / f"{SERIES_NAME} - Fig 3 2020_2021.png")
 
 
 def plot_vaccination_detail(df: pd.DataFrame):
+
+    file_name = "Fig 4 Vaccine detail"
 
     df = df.loc["1 Dec 2020":"31 Mar 2021"]
 
@@ -203,7 +207,11 @@ def plot_vaccination_detail(df: pd.DataFrame):
         events=events,
         show_vaccinations=True,
     )
-    plt.savefig(OUTPUT_DIR / "Fig 4 Vaccine detail.png")
+    plt.savefig(OUTPUT_DIR / f"{SERIES_NAME} - {file_name}.png")
+
+    datawrapper_df = df[["infections", "Vaccinations"]]
+    datawrapper_df["infections - fit"] = infection
+    datawrapper_df.to_csv(OUTPUT_DIR / f"{SERIES_NAME} - {file_name}.csv")
 
 
 if __name__ == "__main__":
@@ -221,3 +229,4 @@ if __name__ == "__main__":
     plot_overview(df)
     plot_2020(df)
     plot_2020_2021(df)
+    plot_vaccination_detail(df)
