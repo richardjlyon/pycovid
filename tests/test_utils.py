@@ -1,5 +1,5 @@
 from pycovid import DATA_DIR
-from pycovid.data_utils import read_daily_registrations
+from pycovid.data_utils import read_ONS_daily_registrations
 import pandas as pd
 
 
@@ -14,7 +14,7 @@ def test_read_excel():
     cols = "A:B"
     daterange = pd.date_range(start="2 Mar 2020", end="9 Apr 2021")
 
-    df = read_daily_registrations(
+    df = read_ONS_daily_registrations(
         filename=filename, skiprows=skiprows, cols=cols, daterange=daterange
     )
 

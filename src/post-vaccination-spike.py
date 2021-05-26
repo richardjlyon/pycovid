@@ -4,8 +4,8 @@ vaccine_odds_ratio.py
 Visualises the odds ratio data presented in Public Health England's COVID-19 vaccine surveillance report Week 20
 """
 
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 from pycovid import DATA_DIR, OUTPUT_DIR
 
 DATA_DIR = DATA_DIR / "PHE_VACCINE_REPORT_20"

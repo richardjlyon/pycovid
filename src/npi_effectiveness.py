@@ -15,12 +15,9 @@ from pycovid.chart_utils import (
     EventItem,
     LabelOrigin,
 )
-from pycovid.data_utils import (
-    prepare_fatal_infection_data,
-    read_vaccination_data,
-    polyfit,
-    XLMeta,
-)
+from pycovid.data_utils import polyfit
+from pycovid.data_utils.nhs import read_vaccination_data
+from pycovid.data_utils.ons import prepare_fatal_infection_data, XLMeta
 
 SERIES_NAME = "NPI Effectiveness"
 

@@ -3,7 +3,7 @@ import math
 import matplotlib.pyplot as plt
 import pandas as pd
 from pycovid import OUTPUT_DIR
-from pycovid.data_utils import prepare_owid_data
+from pycovid.data_utils.owid import prepare_owid_data
 
 DATASOURCE = "owid-covid-data-uk-india.csv"
 

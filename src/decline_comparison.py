@@ -4,17 +4,12 @@ decline_comparison.py
 Prepare a plot that compares the 2020 and 2021 post-peak declines to analyse decline rates and assess the impact of
 vaccine (if any).
 """
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-
+import numpy as np
+import pandas as pd
 from pycovid import OUTPUT_DIR
-
-from pycovid.data_utils import (
-    prepare_fatal_infection_data,
-    read_vaccination_data,
-    polyfit,
-)
+from pycovid.data_utils.nhs import read_vaccination_data
+from pycovid.data_utils.ons import prepare_fatal_infection_data, XLMeta
 
 
 def isolate_declines():
@@ -60,12 +55,14 @@ def fit_lines(df_sample):
 
 
 if __name__ == "__main__":
-    df = prepare_fatal_infection_data(
-        workbook="publishedweek142021.xlsx",
+    meta = XLMeta(
+        workbook="publishedweek1820211.xlsx",
         region="England",
-        start_date="1 Feb 2020",
-        end_date="28 Apr 2021",
+        start_row=4,
+        end_row=436,
     )
+    df = prepare_fatal_infection_data(meta)
+
     df["Vaccinations"] = read_vaccination_data(
         workbook="COVID-19-monthly-announced-vaccinations-15-April-2021-revised.xlsx"
     )
