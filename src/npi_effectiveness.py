@@ -158,7 +158,7 @@ def plot_2020_2021(df: pd.DataFrame):
         fits=fits,
         regions=regions,
         events=events,
-        show_vaccinations=True,
+        show_vaccinations=False,
         label_origin=LabelOrigin(50, 320),
     )
 
@@ -214,18 +214,18 @@ def plot_vaccination_detail(df: pd.DataFrame):
 
 if __name__ == "__main__":
     meta = XLMeta(
-        workbook="publishedweek1820211.xlsx",
+        workbook="publishedweek282021.xlsx",
         region="England",
         start_row=4,
-        end_row=436,
+        end_row=506,
     )
     df = prepare_fatal_infection_data(meta)
 
-    df["Vaccinations"] = read_vaccination_data(
-        workbook="COVID-19-monthly-announced-vaccinations-15-April-2021-revised.xlsx"
-    )
+    # df["Vaccinations"] = read_vaccination_data(
+    #     workbook="COVID-19-daily-announced-vaccinations-28-July-2021.xlsx"
+    # )
 
     plot_overview(df)
     plot_2020(df)
     plot_2020_2021(df)
-    plot_vaccination_detail(df)
+    # plot_vaccination_detail(df)

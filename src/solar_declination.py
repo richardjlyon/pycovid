@@ -5,7 +5,8 @@ import pandas as pd
 from pycovid import OUTPUT_DIR
 from pycovid.data_utils.owid import prepare_owid_data
 
-DATASOURCE = "owid-covid-data-uk-india.csv"
+DATASOURCE = "owid-covid-data-uk-india-280721.csv"
+COUNTRY = None
 
 
 def declination_angle(date: pd.Timestamp) -> float:
@@ -50,10 +51,9 @@ def plot_data(df: pd.DataFrame):
     ax1.plot(df.index, df["UK"], color="tab:green", label="UK (Northern Temperate)")
     ax1.fill_between(df.index, df["UK"], color="tab:green", alpha=0.1)
 
-    ax1.plot(
-        df.index, df["India"], color="tab:purple", label="India (Northern Tropical)"
-    )
-    ax1.fill_between(df.index, df["India"], color="tab:purple", alpha=0.1)
+    if COUNTRY is not None:
+        ax1.plot(df.index, df[COUNTRY], color="tab:purple", label=COUNTRY)
+        ax1.fill_between(df.index, df[COUNTRY], color="tab:purple", alpha=0.1)
 
     ax2.plot(
         df.index,
@@ -80,8 +80,8 @@ def plot_data(df: pd.DataFrame):
 
 if __name__ == "__main__":
 
-    df_deaths = prepare_owid_data(DATASOURCE)
-    df_solar = compute_declination("1 Feb 2020", "16 May 2021")
+    df_deaths = prepare_owid_data(DATASOURCE, COUNTRY)
+    df_solar = compute_declination("1 Feb 2020", "27 Jul 2021")
     df = pd.concat([df_deaths, df_solar], axis=1)
 
     plot_data(df)

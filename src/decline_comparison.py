@@ -17,14 +17,14 @@ def isolate_declines():
     """Isolate declines, normalise, and timeshift to overlay them."""
 
     # make room
-    idx = pd.date_range("1 Jan 2020", "31 Mar 2021")
+    idx = pd.date_range("1 Jan 2020", "31 Jul 2021")
     df = df.reindex(idx)
 
     df_2020 = df["infections"].loc["20 Mar 2020":"31 Jul 2020"]
     df_2020 = df_2020 / df_2020.max()
     df_2020.reset_index(drop=True, inplace=True)
 
-    df_2021 = df["infections"].loc["15 Jan 2021":"30 Apr 2021"]
+    df_2021 = df["infections"].loc["15 Jan 2021":"31 Jul 2021"]
     df_2021 = df_2021 / df_2021.max()
     df_2021.reset_index(drop=True, inplace=True)
 
@@ -55,21 +55,24 @@ def fit_lines(df_sample):
 
 
 if __name__ == "__main__":
+
+    PLOT_VACCINATION = False
+
     meta = XLMeta(
-        workbook="publishedweek1820211.xlsx",
-        region="England",
+        workbook="publishedweek282021.xlsx",
+        region="UK",
         start_row=4,
-        end_row=436,
+        end_row=506,
     )
     df = prepare_fatal_infection_data(meta)
 
     df["Vaccinations"] = read_vaccination_data(
-        workbook="COVID-19-monthly-announced-vaccinations-15-April-2021-revised.xlsx"
+        workbook="COVID-19-monthly-announced-vaccinations-13-May-2021.xlsx"
     )
 
     df = isolate_declines()
 
-    samples = [(2020, df["2020 (log)"][:90]), (2021, df["2021 (log)"][:50])]
+    samples = [(2020, df["2020 (log)"][:80]), (2021, df["2021 (log)"][:80])]
     for year, sample in samples:
         log_fit, fit = fit_lines(sample)
         df[f"{year} (log fit)"] = log_fit
@@ -82,7 +85,7 @@ if __name__ == "__main__":
     fig.set_size_inches(16, 5)
     fig.set_tight_layout(True)
     fig.patch.set_facecolor("white")
-    fig.suptitle("Fatal COVID-19 infection - post peak decline comparison (England)")
+    fig.suptitle("Fatal COVID-19 infection - post peak decline comparison (UK)")
 
     ax1.annotate(
         "richardlyon.substack.com",
@@ -110,20 +113,21 @@ if __name__ == "__main__":
     ax2.set_ylabel("fatal infections (logarithmic scale)")
     ax2.set_xlabel("Days from peak")
 
-    df["vaccinations"] = df["vaccinations"] / 1e6
-    ax3.set_ylabel("Total vaccination doses (million)", color="m")
-    ax3.set_ylim([0, df["vaccinations"].max() * 2])
-    ax3.plot(df["vaccinations"], color="m", label="2021 vaccination doses (total)")
-    ax3.fill_between(
-        x=df["vaccinations"].index,
-        y1=0,
-        y2=df["vaccinations"],
-        color="m",
-        alpha=0.05,
-    )
+    if PLOT_VACCINATION:
+        df["vaccinations"] = df["vaccinations"] / 1e6
+        ax3.set_ylabel("Total vaccination doses (million)", color="m")
+        ax3.set_ylim([0, df["vaccinations"].max() * 2])
+        ax3.plot(df["vaccinations"], color="m", label="2021 vaccination doses (total)")
+        ax3.fill_between(
+            x=df["vaccinations"].index,
+            y1=0,
+            y2=df["vaccinations"],
+            color="m",
+            alpha=0.05,
+        )
+        ax3.legend(loc="lower right")
 
     ax1.legend()
     ax2.legend()
-    ax3.legend(loc="lower right")
 
     plt.savefig(OUTPUT_DIR / "Post peak comparison.png")
