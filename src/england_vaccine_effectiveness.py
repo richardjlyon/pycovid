@@ -110,11 +110,14 @@ class InfectionData:
         self.df = self.df.set_index([("Date", "Unnamed: 1_level_1")])
         self.df.index.rename(("Date"), inplace=True)
 
-    def cases(self, date: datetime, measure: str, is_under_50: bool) -> int:
-        df = self.df[self.df.index <= date].iloc[-1]  # .swaplevel()
-        print(df)
+    def cases(self, date: datetime, is_under_50: bool, measure: str) -> int:
+        df = self.df[self.df.index <= date].iloc[-1]
+        if is_under_50:
+            df = df["<50"]
+        else:
+            df = df[">=50"]
 
-        return None
+        return df[measure]
 
     def attack_rate(self, is_under_50: bool, vaccine_data: VaccineData) -> pd.DataFrame:
 

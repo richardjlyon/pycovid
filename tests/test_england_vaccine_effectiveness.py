@@ -1,5 +1,6 @@
 from src.england_vaccine_effectiveness import VaccineData, InfectionData
 import pandas as pd
+import pytest
 from datetime import datetime
 
 v = VaccineData(week_no=37)
@@ -10,45 +11,56 @@ class TestVaccineData:
     def test_initialise(self):
         assert isinstance(v.df.columns, pd.MultiIndex)
 
-    def test_people_in_cohort(self):
-        assert v.cohort(is_under_50=True, date=datetime(2021, 1, 3)) == 39919843
-        assert v.cohort(is_under_50=True, date=datetime(2021, 7, 22)) == 39919843
-        assert v.cohort(is_under_50=False, date=datetime(2021, 8, 30)) == 22336445
+    @pytest.mark.parametrize(
+        "is_under_50, date, expected",
+        [
+            (True, datetime(2021, 1, 3), 39919843),
+            (True, datetime(2021, 7, 22), 39919843),
+            (False, datetime(2021, 8, 30), 22336445),
+        ],
+    )
+    def test_people_in_cohort(self, is_under_50, date, expected):
+        assert v.cohort(is_under_50=is_under_50, date=date) == expected
 
-    def test_vaccinated(self):
+    @pytest.mark.parametrize(
+        "is_under_50, date, is_double, expected",
+        [
+            (True, datetime(2021, 7, 22), True, 10361734),
+            (False, datetime(2021, 8, 30), False, 20375394),
+        ],
+    )
+    def test_vaccinated(self, is_under_50, date, is_double, expected):
         assert (
-            v.vaccinated(is_under_50=True, date=datetime(2021, 7, 22), is_double=True)
-            == 10361734
-        )
-        assert (
-            v.vaccinated(is_under_50=False, date=datetime(2021, 8, 30), is_double=False)
-            == 20375394
+            v.vaccinated(is_under_50=is_under_50, date=date, is_double=is_double)
+            == expected
         )
 
-    def test_unvaccinated(self):
+    @pytest.mark.parametrize(
+        "is_under_50, date, is_double, expected",
+        [
+            (True, datetime(2021, 7, 22), True, 39919843 - 10361734),
+            (False, datetime(2021, 8, 30), False, 22336445 - 20375394),
+        ],
+    )
+    def test_unvaccinated(self, is_under_50, date, is_double, expected):
         assert (
-            v.unvaccinated(is_under_50=True, date=datetime(2021, 7, 22), is_double=True)
-            == 39919843 - 10361734
-        )
-        assert (
-            v.unvaccinated(
-                is_under_50=False, date=datetime(2021, 8, 30), is_double=False
-            )
-            == 22336445 - 20375394
+            v.unvaccinated(is_under_50=is_under_50, date=date, is_double=is_double)
+            == expected
         )
 
 
 class TestInfectionData:
-    def test_initialise(self):
-        assert i.df.loc[datetime(2021, 6, 25)]["<50"]["Dose 1 < 21 days"] == 8453
-        assert i.df.loc[datetime(2021, 9, 3)][">=50"]["Dose 2 >= 14 days"] == 71991
-
-    def test_cases(self):
-        cases = i.cases(
-            date=datetime(2021, 6, 21), measure="Unvaccinated", is_under_50=True
-        )
-        # print(df)
-        assert cases == 70664
+    @pytest.mark.parametrize(
+        "date, is_under_50, measure, expected",
+        [
+            (datetime(2021, 6, 25), True, "Dose 2 >= 14 days", 5600),
+            (datetime(2021, 7, 19), True, "Unvaccinated", 119063),
+            (datetime(2021, 8, 20), False, "Dose 1 < 21 days", 277),
+        ],
+    )
+    def test_cases(self, date, is_under_50, measure, expected):
+        cases = i.cases(date=date, is_under_50=is_under_50, measure=measure)
+        assert cases == expected
 
 
 # def test_infection_rate():
