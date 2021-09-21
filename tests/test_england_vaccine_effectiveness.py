@@ -50,6 +50,10 @@ class TestVaccineData:
 
 
 class TestInfectionData:
+    def test_init(self):
+        print(i.df.columns)
+        print(i.df["<50"])
+
     @pytest.mark.parametrize(
         "date, is_under_50, measure, expected",
         [
@@ -60,6 +64,17 @@ class TestInfectionData:
     )
     def test_cases(self, date, is_under_50, measure, expected):
         cases = i.cases(date=date, is_under_50=is_under_50, measure=measure)
+        assert cases == expected
+
+    @pytest.mark.parametrize(
+        "date, is_under_50, measure, expected",
+        [
+            (datetime(2021, 7, 9), True, "Unvaccinated", 119063 - 70664),
+            (datetime(2021, 8, 20), False, "Dose 1 < 21 days", 277 - 228),
+        ],
+    )
+    def test_delta_cases(self, date, is_under_50, measure, expected):
+        cases = i.delta_cases(date=date, is_under_50=is_under_50, measure=measure)
         assert cases == expected
 
 

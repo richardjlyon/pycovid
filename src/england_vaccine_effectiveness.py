@@ -119,34 +119,15 @@ class InfectionData:
 
         return df[measure]
 
-    def attack_rate(self, is_under_50: bool, vaccine_data: VaccineData) -> pd.DataFrame:
-
+    def delta_cases(self, date: datetime, is_under_50: bool, measure: str) -> int:
         if is_under_50:
-            infection_df = self.df["<50"]
-            vaccine_df = vaccine_data.df[UNDER_50]
+            age_range = "<50"
         else:
-            infection_df = self.df[">=50"]
-            vaccine_df = vaccine_data.df[OVER_50]
+            age_range = ">=50"
 
-        df = pd.DataFrame(index=infection_df.index)
+        df = self.df[age_range][measure] - self.df[age_range][measure].shift(1)
 
-        # compute case deltas
-
-        MEASURES = [
-            "Dose 1 < 21 days",
-            "Dose 1 >= 21 days",
-            "Dose 2 >= 14 days",
-            "Unvaccinated",
-        ]
-
-        for measure in MEASURES:
-            df[f"Δ {measure}"] = infection_df[measure] - infection_df[measure].shift(1)
-
-        # compute vaccine status
-
-        print(df)
-
-        return df
+        return df[df.index <= date].iloc[-1]
 
 
 if __name__ == "__main__":
