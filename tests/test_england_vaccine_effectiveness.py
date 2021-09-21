@@ -40,14 +40,8 @@ class TestVaccineData:
 
 class TestInfectionData:
     def test_initialise(self):
-
-        print(i.df)
-        assert (
-            i.df.loc[datetime(2021, 6, 25)]["<50"]["Dose 1 < 21 days"].iloc[0] == 8453
-        )
-        assert (
-            i.df.loc[datetime(2021, 9, 3)][">=50"]["Dose 2 >= 14 days"].iloc[0] == 71991
-        )
+        assert i.df.loc[datetime(2021, 6, 25)]["<50"]["Dose 1 < 21 days"] == 8453
+        assert i.df.loc[datetime(2021, 9, 3)][">=50"]["Dose 2 >= 14 days"] == 71991
 
     def test_cases(self):
         cases = i.cases(

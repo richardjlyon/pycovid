@@ -107,10 +107,8 @@ class InfectionData:
             header=[0, 1],
         )
 
-        self.df = self.df.set_index(
-            [("Date", "Unnamed: 1_level_1"), ("Report", "Unnamed: 0_level_1")]
-        )
-        self.df.index.rename(("Date", "Report"), inplace=True)
+        self.df = self.df.set_index([("Date", "Unnamed: 1_level_1")])
+        self.df.index.rename(("Date"), inplace=True)
 
     def cases(self, date: datetime, measure: str, is_under_50: bool) -> int:
         df = self.df[self.df.index <= date].iloc[-1]  # .swaplevel()
